@@ -36,4 +36,10 @@ export class CourseController {
   deleteCourse(@Param('id') id : string) : object{
     return this.courseService.deleteCourse(id);
   }
+
+  @Post(':id/upload')
+  uploadCourseMaterial(id: string, file: Express.Multer.File) : object
+  {
+    return this.courseService.uploadCourseMaterial(id, file);
+  }
 }
