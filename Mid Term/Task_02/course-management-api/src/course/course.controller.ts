@@ -1,7 +1,9 @@
-import { Controller, Delete, Get, Post, Put, Param, Patch, Body } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Put, Param, Patch, Body, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { CourseService } from './course.service.js';
 import { CreateCourseDto } from './dtos/create-course.dto.js';
 import { UpdateCourseDto } from './dtos/update-course.dto.js';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('course')
 export class CourseController {
@@ -38,7 +40,23 @@ export class CourseController {
   }
 
   @Post(':id/upload')
-  uploadCourseMaterial(id: string, file: Express.Multer.File) : object
+  @UseInterceptors(
+    FileInterceptor('file')
+    // , (
+    //   {
+    //     Storage: diskStorage(
+    //     {destination: './uploads'})
+    //   })
+    )
+  uploadCourseMaterial(@Param('id') id: string, 
+    @UploadedFile(new ParseFilePipe(
+      {
+        validators: [
+          new MaxFileSizeValidator({maxSize: 2*1024*1024}),
+          new FileTypeValidator({fileType: 'image/*'})
+        ]
+      })) 
+      file: Express.Multer.File) : object
   {
     return this.courseService.uploadCourseMaterial(id, file);
   }
