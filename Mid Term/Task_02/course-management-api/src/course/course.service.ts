@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCourseDto } from './dtos/create-course.dto.js';
 import { UpdateCourseDto } from './dtos/update-course.dto.js';
-import type { Express } from 'express';
 
 @Injectable()
 export class CourseService {
@@ -50,13 +49,13 @@ export class CourseService {
         return { message: "Course deleted successfully", id: `${id}`};
     }
 
-    uploadCourseMaterial(id: string, file: Express.Multer.File) : object
+    uploadCourseMaterial(id: string, filename: string, filepath: string) : object
     {
         return{ 
                 message: "Material uploaded successfully", 
                 courseId: `${id}`, 
-                filename: file.filename,
-                path: file.path
+                filename: filename,
+                path: filepath
         };
     }
 }

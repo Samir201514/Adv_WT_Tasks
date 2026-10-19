@@ -3,7 +3,8 @@ import { CourseService } from './course.service.js';
 import { CreateCourseDto } from './dtos/create-course.dto.js';
 import { UpdateCourseDto } from './dtos/update-course.dto.js';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
+import { memoryStorage } from 'multer';
+import { promises as fs } from 'fs';
 
 @Controller('course')
 export class CourseController {
@@ -41,23 +42,27 @@ export class CourseController {
 
   @Post(':id/upload')
   @UseInterceptors(
-    FileInterceptor('file')
-    // , (
-    //   {
-    //     Storage: diskStorage(
-    //     {destination: './uploads'})
-    //   })
+    FileInterceptor('file', 
+      {
+        storage: memoryStorage()
+      }
     )
-  uploadCourseMaterial(@Param('id') id: string, 
+  )
+  async uploadCourseMaterial(@Param('id') id: string, 
     @UploadedFile(new ParseFilePipe(
       {
         validators: [
           new MaxFileSizeValidator({maxSize: 2*1024*1024}),
-          new FileTypeValidator({fileType: 'image/*'})
+          new FileTypeValidator({fileType: /^(image\/jpeg|image\/png|application\/pdf)$/})
         ]
       })) 
-      file: Express.Multer.File) : object
+      file: Express.Multer.File)
   {
-    return this.courseService.uploadCourseMaterial(id, file);
+    const filename = (file.originalname).toLowerCase();
+    const filepath = `./uploads/${filename}`;
+
+    await fs.writeFile(filepath, file.buffer);
+    
+    return this.courseService.uploadCourseMaterial(id, filename, filepath);
   }
 }
