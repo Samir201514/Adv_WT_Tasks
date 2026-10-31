@@ -65,7 +65,7 @@ export class ProductsService {
   async update(
     id: number,
     dto: PartialUpdateProductDto,
-  ): Promise<{ message: string; data: Products | null }> {
+  ): Promise<{ message: string; data: PartialUpdateProductDto }> {
     const hasProduct = await this.productsRepo.findOneBy({ id });
 
     if (!hasProduct) {
@@ -73,11 +73,11 @@ export class ProductsService {
     }
 
     await this.productsRepo.update(id, dto);
-    const product = await this.productsRepo.findOneBy({ id });
+    // const product = await this.productsRepo.findOneBy({ id });
 
     return {
       message: `Product with ID: ${id} Updated!`,
-      data: product,
+      data: dto,
     };
   }
 
